@@ -1,0 +1,10 @@
+{
+  "github": "your-github-username",
+  "display_name": "ชื่อที่ต้องการให้แสดงบนเว็บ",
+  "cohort": "ECP1N",
+  "year": 2569,
+  "tagline": "หนึ่งประโยคว่าสนใจสร้างอะไร",
+  "site": "https://your-github-username.github.io",
+  "interests": ["embedded", "network"],
+  "accent": "#38bdf8"
+}

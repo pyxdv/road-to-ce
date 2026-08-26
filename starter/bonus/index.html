@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- ชื่อที่แสดงบนแท็บของ browser แก้ให้เป็นชื่อของตนเอง -->
+  <title>เว็บไซต์ของฉัน</title>
+  <meta name="description" content="เว็บไซต์ส่วนตัวของนักศึกษาวิศวกรรมคอมพิวเตอร์">
+
+  <link rel="stylesheet" href="style.css">
+
+  <!-- ไอคอนบนแท็บของ browser เปลี่ยนอิโมจิในบรรทัดนี้ได้ -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚡</text></svg>">
+</head>
+<body>
+<div class="wrap">
+
+  <!-- ข้อความวิ่งตอนเปิดหน้า เปลี่ยนคำได้ตามใจ -->
+  <div class="boot" aria-hidden="true">
+    <span>&gt; resolving hostname ...</span>
+    <span>&gt; TLS handshake ... <b>ok</b></span>
+    <span>&gt; GET / ... <b>200 OK</b></span>
+    <span>&gt; ready.</span>
+  </div>
+
+  <header class="hero">
+    <p class="role" id="role">กำลังโหลด...</p>
+    <h1 id="name">—</h1>
+    <p class="tagline" id="tagline"></p>
+    <p class="about" id="about"></p>
+    <ul class="links" id="links"></ul>
+  </header>
+
+  <section>
+    <h2>ตอนนี้กำลังทำอะไรอยู่</h2>
+    <ul class="now" id="now"></ul>
+  </section>
+
+  <!-- =========================================================
+       แผงนี้ไม่ได้พิมพ์ค่าไว้ล่วงหน้า
+       ค่าทุกตัวด้านล่าง browser วัดจากการโหลดหน้านี้จริง
+       เปรียบเทียบกับ DevTools > Network ได้ ค่าควรสอดคล้องกัน
+       ========================================================= -->
+  <section>
+    <h2>ข้อมูลการเชื่อมต่อของหน้านี้</h2>
+    <div class="panel">
+      <dl class="rows" id="netpanel"></dl>
+      <p class="hint">
+        ค่าทุกตัวในแผงนี้ browser วัดจากการโหลดหน้านี้จริง กด F12 เลือกแท็บ Network
+        แล้วกด Ctrl+F5 เพื่อเปรียบเทียบค่า
+      </p>
+    </div>
+  </section>
+
+  <footer>
+    สร้างด้วย HTML, CSS และ JavaScript ล้วน ๆ ไม่มี framework
+    · โฮสต์บน GitHub Pages
+    · <a id="repolink" href="https://github.com">ดูซอร์สโค้ดของหน้านี้</a>
+  </footer>
+
+</div>
+
+<script>
+/* ============================================================
+   1) ดึงข้อมูลตัวเองจากไฟล์ data/profile.json
+   สังเกตว่าไฟล์ HTML ไม่ได้เก็บชื่อไว้เลย แต่ไปขอข้อมูลจากอีกไฟล์หนึ่ง
+   นี่คือการแยกข้อมูลออกจากการแสดงผล เปิด DevTools > Network แล้วรีเฟรช
+   จะเห็นว่า profile.json เป็นอีก request หนึ่งแยกต่างหาก
+   ============================================================ */
+const $ = (id) => document.getElementById(id);
+
+fetch('data/profile.json')
+  .then((res) => {
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    return res.json();
+  })
+  .then(render)
+  .catch((err) => {
+    $('name').textContent = 'โหลด profile.json ไม่สำเร็จ';
+    $('tagline').textContent = String(err);
+    $('about').textContent =
+      'หากเปิดไฟล์นี้ด้วยการดับเบิลคลิกจากเครื่อง (URL ขึ้นต้นด้วย file://) ' +
+      'browser จะบล็อกการอ่านไฟล์อื่นตามกฎ same-origin ' +
+      'ให้เปิดผ่าน URL ของ GitHub Pages แทน';
+  });
+
+function render(p) {
+  document.title = p.name || 'เว็บไซต์ของฉัน';
+  if (p.accent) document.documentElement.style.setProperty('--accent', p.accent);
+
+  $('role').textContent = p.role || '';
+  $('name').textContent = p.name || '';
+  $('tagline').textContent = p.tagline || '';
+  $('about').textContent = p.about || '';
+
+  $('now').innerHTML = '';
+  (p.now || []).forEach((item) => {
+    const li = document.createElement('li');
+    li.textContent = item;          // ใช้ textContent เสมอ ปลอดภัยกว่า innerHTML
+    $('now').appendChild(li);
+  });
+
+  $('links').innerHTML = '';
+  (p.links || []).forEach((link) => {
+    const a = document.createElement('a');
+    a.href = link.url;
+    a.textContent = link.label;
+    a.rel = 'noopener noreferrer';
+    const li = document.createElement('li');
+    li.appendChild(a);
+    $('links').appendChild(li);
+  });
+}
+
+/* ============================================================
+   2) แผงข้อมูลการเชื่อมต่อ
+   Performance API ของ browser เก็บเวลาของทุกช่วงในการโหลดหน้านี้ไว้
+   โค้ดส่วนนี้เพียงอ่านค่าออกมาแสดงผล
+   ============================================================ */
+function ms(value) {
+  /* 0 ms ไม่ใช่ "ไม่มีค่า" แต่แปลว่าbrowserข้ามขั้นนั้นไปเพราะจำคำตอบไว้แล้ว */
+  if (typeof value !== 'number' || value < 0 || Number.isNaN(value)) return '—';
+  return Math.round(value) + ' ms';
+}
+
+function buildNetPanel() {
+  const nav = performance.getEntriesByType('navigation')[0];
+  const rows = [
+    ['Domain name', location.hostname || '(เปิดจากไฟล์ในเครื่อง)',
+     'ชื่อโดเมนต้องถูกแปลงเป็น IP address ผ่าน DNS ก่อน จึงจะติดต่อ server ได้'],
+    ['Protocol', location.protocol,
+     'https คือ HTTP ที่เพิ่มการเข้ารหัสและการยืนยันตัวตน server ด้วย certificate'],
+    ['Secure context', window.isSecureContext ? 'ใช่' : 'ไม่ใช่',
+     'ถ้าไม่ใช่ browser จะปิดความสามารถหลายอย่างของหน้าเว็บไม่ให้ใช้งาน'],
+  ];
+
+  if (nav) {
+    rows.push(
+      ['HTTP version', nav.nextHopProtocol || '—',
+       'h2 คือ HTTP/2 และ h3 คือ HTTP/3 ซึ่งส่งหลายไฟล์พร้อมกันได้ในการเชื่อมต่อเดียว'],
+      ['DNS lookup', ms(nav.domainLookupEnd - nav.domainLookupStart),
+       'เวลาที่ใช้แปลงชื่อโดเมนเป็น IP address ถ้าได้ 0 ms แปลว่ามีคำตอบอยู่ใน cache แล้ว'],
+      ['Connection + TLS', ms(nav.connectEnd - nav.connectStart),
+       'เวลาสร้างการเชื่อมต่อ รวมขั้นตอน TLS handshake ก่อนเริ่มรับส่งข้อมูลจริง'],
+      ['TTFB', ms(nav.responseStart - nav.requestStart),
+       'Time To First Byte เวลาตั้งแต่ส่ง request จนได้ข้อมูลไบต์แรกกลับมา ยิ่ง server ไกลยิ่งสูง'],
+      ['Total load time', ms(nav.duration),
+       'เวลารวมตั้งแต่เริ่มส่ง request จนแสดงผลหน้าเว็บเสร็จ']
+    );
+  }
+
+  const dl = $('netpanel');
+  rows.forEach(([label, value, note]) => {
+    const div = document.createElement('div');
+    div.className = 'row';
+    const dt = document.createElement('dt');
+    dt.textContent = label;
+    const dd = document.createElement('dd');
+    dd.textContent = value;
+    const small = document.createElement('span');
+    small.className = 'note';
+    small.textContent = note;
+    dd.appendChild(small);
+    div.append(dt, dd);
+    dl.appendChild(div);
+  });
+}
+
+/* รอให้หน้าโหลดเสร็จก่อน ค่า duration จึงจะครบ */
+window.addEventListener('load', () => setTimeout(buildNetPanel, 0));
+
+/* สร้างลิงก์ไปยัง repository ของผู้ใช้เองโดยอัตโนมัติ */
+if (location.hostname.endsWith('.github.io')) {
+  const user = location.hostname.replace('.github.io', '');
+  $('repolink').href = 'https://github.com/' + user + '/' + user + '.github.io';
+}
+</script>
+</body>
+</html>

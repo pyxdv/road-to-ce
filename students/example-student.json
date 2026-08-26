@@ -1,0 +1,10 @@
+{
+  "github": "example-student",
+  "display_name": "ตัวอย่าง (Example)",
+  "cohort": "ECP1N",
+  "year": 2569,
+  "tagline": "ไฟล์ตัวอย่างสำหรับดูรูปแบบ ห้ามลบและห้ามแก้ไข",
+  "site": "https://pyxdv.github.io/road-to-ce/",
+  "interests": ["embedded", "network", "robotics"],
+  "accent": "#f59e0b"
+}

@@ -1,0 +1,94 @@
+name: ตรวจไฟล์ข้อมูลนักศึกษา
+
+on:
+  pull_request:
+    paths:
+      - 'students/**'
+      - 'scripts/validate_students.py'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    name: ตรวจไฟล์ใน students/
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: ตรวจว่า Pull Request นี้แก้ไฟล์ใดบ้าง
+        id: changed
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          git diff --name-only --diff-filter=ACMR "$BASE_SHA" "$HEAD_SHA" > /tmp/changed.txt || true
+          echo "ไฟล์ที่เปลี่ยนใน Pull Request นี้:"
+          cat /tmp/changed.txt
+          grep '^students/.*\.json$' /tmp/changed.txt > /tmp/cards.txt || true
+          echo "files=$(tr '\n' ' ' < /tmp/cards.txt)" >> "$GITHUB_OUTPUT"
+
+      - name: หนึ่งคนหนึ่งไฟล์ ห้ามแก้ไฟล์ของผู้อื่น
+        env:
+          AUTHOR: ${{ github.event.pull_request.user.login }}
+          ASSOCIATION: ${{ github.event.pull_request.author_association }}
+        run: |
+          # กฎนี้มีไว้ป้องกันไม่ให้นักศึกษาแก้ไฟล์ของกันและกัน
+          # ผู้ดูแลรายวิชาต้องแก้ไฟล์ต้นแบบและแก้ไฟล์ที่มีปัญหาได้ จึงข้ามการตรวจนี้
+          case "$ASSOCIATION" in
+            OWNER|MEMBER|COLLABORATOR)
+              echo "ℹ️ @$AUTHOR เป็นผู้ดูแลรายวิชา ($ASSOCIATION) — ข้ามการตรวจความเป็นเจ้าของไฟล์"
+              echo "   ไฟล์ทุกไฟล์จะยังถูกตรวจรูปแบบและข้อมูลส่วนบุคคลในขั้นถัดไปตามปกติ"
+              exit 0
+              ;;
+          esac
+
+          fail=0
+          while read -r f; do
+            [ -z "$f" ] && continue
+            name=$(basename "$f" .json)
+            case "$f" in
+              students/_TEMPLATE.json|students/example-student.json)
+                echo "❌ $f เป็นไฟล์ต้นแบบของรายวิชา ห้ามแก้ไข"
+                fail=1
+                continue
+                ;;
+            esac
+            if [ "$name" != "$AUTHOR" ]; then
+              echo "❌ $f ไม่ใช่ไฟล์ของ @$AUTHOR"
+              echo "   Pull Request หนึ่งรายการเพิ่มได้เฉพาะไฟล์ students/$AUTHOR.json ของตนเองเท่านั้น"
+              fail=1
+            else
+              echo "✅ $f เป็นไฟล์ของ @$AUTHOR"
+            fi
+          done < /tmp/cards.txt
+          exit $fail
+
+      - name: ตรวจรูปแบบไฟล์และข้อมูลส่วนบุคคล
+        run: python3 scripts/validate_students.py
+
+      - name: ทดลองสร้าง Class Wall เพื่อตรวจว่าไม่มีข้อผิดพลาด
+        run: python3 scripts/build_wall.py
+
+      - name: สรุปผลให้อ่านง่าย
+        if: always()
+        run: |
+          {
+            echo "## ผลการตรวจไฟล์"
+            echo
+            if [ "${{ job.status }}" = "success" ]; then
+              echo "✅ ผ่านทุกข้อ รอเพื่อนร่วมรุ่นทำ code review และ approve"
+            else
+              echo "❌ ยังไม่ผ่าน เปิดดู log ของ step ที่ขึ้นสีแดงด้านบน"
+              echo
+              echo "แก้ไฟล์บน branch เดิมแล้ว commit ใหม่ Pull Request จะอัปเดตและตรวจซ้ำให้เอง"
+              echo "ไม่ต้องปิดแล้วเปิด Pull Request ใหม่"
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"

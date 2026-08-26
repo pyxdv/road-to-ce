@@ -1,0 +1,6 @@
+site/
+__pycache__/
+*.pyc
+~$*.docx
+slides/tools/node_modules/
+slides/tools/package*.json

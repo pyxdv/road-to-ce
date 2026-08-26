@@ -1,0 +1,137 @@
+/* ============================================================
+   สไตล์ของเว็บไซต์
+   เปลี่ยนสีหลักได้ที่ค่า accent ในไฟล์ data/profile.json
+   แก้ไขหรือเขียนใหม่ทั้งไฟล์ได้ตามต้องการ
+   ============================================================ */
+
+:root {
+  --bg: #0b1020;
+  --panel: rgba(255, 255, 255, 0.04);
+  --line: #24304f;
+  --text: #e8edf7;
+  --muted: #93a1c0;
+  --accent: #38bdf8;
+  --mono: ui-monospace, "SF Mono", "Cascadia Mono", Menlo, Consolas, monospace;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background:
+    radial-gradient(1000px 460px at 12% -10%, #1d2a52 0%, transparent 60%),
+    radial-gradient(820px 400px at 92% 0%, #10305c 0%, transparent 55%),
+    var(--bg);
+  color: var(--text);
+  font-family: "Segoe UI", "Noto Sans Thai", system-ui, -apple-system, sans-serif;
+  line-height: 1.7;
+}
+
+.wrap { max-width: 940px; margin: 0 auto; padding: 0 20px 80px; }
+
+/* ---------- boot log: ข้อความที่แสดงตอนเปิดหน้าเว็บ ---------- */
+.boot {
+  font: 13px/1.9 var(--mono);
+  color: var(--muted);
+  padding: 40px 0 0;
+  min-height: 132px;
+}
+.boot span { display: block; opacity: 0; animation: fadein .28s ease forwards; }
+.boot span:nth-child(1) { animation-delay: .05s; }
+.boot span:nth-child(2) { animation-delay: .30s; }
+.boot span:nth-child(3) { animation-delay: .55s; }
+.boot span:nth-child(4) { animation-delay: .80s; }
+.boot b { color: var(--accent); font-weight: 600; }
+@keyframes fadein { to { opacity: 1; } }
+
+/* ---------- หัวเว็บ ---------- */
+.hero { padding: 18px 0 8px; }
+.hero h1 {
+  font-size: clamp(36px, 7vw, 64px);
+  line-height: 1.1;
+  margin: 8px 0 6px;
+  letter-spacing: -0.02em;
+}
+.role {
+  font: 600 13px/1 var(--mono);
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+.tagline { font-size: clamp(18px, 3vw, 22px); color: var(--text); margin: 0 0 18px; max-width: 60ch; }
+.about { color: var(--muted); max-width: 66ch; margin: 0 0 26px; }
+
+.links { display: flex; flex-wrap: wrap; gap: 10px; padding: 0; margin: 0 0 8px; list-style: none; }
+.links a {
+  display: inline-block;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 9px 18px;
+  color: var(--text);
+  text-decoration: none;
+  font-size: 15px;
+  transition: border-color .15s ease, color .15s ease;
+}
+.links a:hover, .links a:focus-visible { border-color: var(--accent); color: var(--accent); }
+
+/* ---------- ส่วนเนื้อหาทั่วไป ---------- */
+section { margin-top: 46px; }
+h2 {
+  font-size: 14px;
+  font-family: var(--mono);
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: var(--muted);
+  border-bottom: 1px solid var(--line);
+  padding-bottom: 10px;
+  margin: 0 0 18px;
+}
+.now { list-style: none; padding: 0; margin: 0; }
+.now li {
+  border-left: 2px solid var(--accent);
+  padding: 4px 0 4px 16px;
+  margin-bottom: 12px;
+  color: var(--muted);
+}
+
+/* ---------- แผงข้อมูลการเชื่อมต่อ ---------- */
+.panel {
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--panel);
+  padding: 6px 20px 18px;
+}
+.panel .hint { color: var(--muted); font-size: 14px; margin: 14px 0 0; }
+.rows { display: grid; gap: 0; }
+.row {
+  display: grid;
+  grid-template-columns: minmax(140px, 1fr) minmax(0, 1.4fr);
+  gap: 12px;
+  padding: 11px 0;
+  border-bottom: 1px dashed var(--line);
+  align-items: baseline;
+}
+.row:last-child { border-bottom: 0; }
+.row dt { color: var(--muted); font-size: 14px; margin: 0; }
+.row dd {
+  margin: 0;
+  font-family: var(--mono);
+  font-size: 14px;
+  color: var(--accent);
+  word-break: break-all;
+}
+.row .note { display: block; color: var(--muted); font-family: inherit; font-size: 12.5px; }
+
+footer {
+  margin-top: 56px;
+  padding-top: 22px;
+  border-top: 1px solid var(--line);
+  color: var(--muted);
+  font-size: 14px;
+}
+footer a { color: var(--accent); }
+
+@media (prefers-reduced-motion: reduce) {
+  .boot span { opacity: 1; animation: none; }
+}
