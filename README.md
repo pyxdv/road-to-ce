@@ -63,26 +63,3 @@ repository นี้เป็น **สาธารณะ** ข้อมูลท
 แต่ความรับผิดชอบสุดท้ายอยู่ที่ผู้เปิด Pull Request
 
 ---
-
-## สำหรับผู้สอน
-
-เอกสารเฉพาะผู้สอน (ตัวอย่างเฉลย และบันทึกการเตรียมสอน) ไม่ได้อยู่ใน repository นี้
-เพราะที่นี่เป็นพื้นที่สาธารณะที่นักศึกษาเปิดดูได้ เอกสารชุดนั้นเก็บไว้ที่
-`road-to-ce-instructor` ซึ่งเป็น repository ส่วนตัวของผู้สอน
-
-```bash
-python3 scripts/validate_students.py     # ตรวจไฟล์ทั้งหมดใน students/
-python3 scripts/build_wall.py            # สร้าง site/index.html
-
-python3 worksheet/tools/build_handout.py         # ใบความรู้
-python3 worksheet/tools/build_worksheet.py       # ใบงานฉบับเต็ม
-python3 worksheet/tools/build_worksheet_print.py # ใบงานฉบับพิมพ์ 2 หน้า
-python3 worksheet/tools/check_pages.py           # นับจำนวนหน้าจริงของทุกไฟล์
-```
-
-`check_pages.py` แปลงไฟล์เป็น PDF แล้วนับหน้า ใช้ยืนยันว่าใบพิมพ์ยังอยู่ใน 2 หน้า
-ต้องมี `libreoffice-writer` และ `poppler-utils` และควรมีฟอนต์ TH Sarabun New ติดตั้งไว้
-เพื่อให้ตัวเลขตรงกับที่ Word เรนเดอร์จริง
-
-สคริปต์ตรวจไฟล์และสร้าง Class Wall ใช้ Python 3 มาตรฐาน ไม่ต้องติดตั้งไลบรารีเพิ่ม
-ส่วนสคริปต์สร้างเอกสาร `.docx` ต้องติดตั้ง `python-docx` ก่อน
