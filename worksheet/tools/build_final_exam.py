@@ -85,13 +85,16 @@ rich(doc, [("ข้อ 2  (2 คะแนน)  ", True, BLUE),
 para(doc, "_" * 92, size=SZ_SMALL, after=0)
 
 rich(doc, [("ข้อ 3  (3 คะแนน)  ", True, BLUE),
-           ("จงเติมข้อมูลของอาเนียให้ครบ", False)],
+           ("อาเนียเผยแพร่เว็บด้วย GitHub Pages และต้องการให้เปิดได้ที่ URL "
+            "ระดับบนสุด", False),
+           ("  คือไม่มีชื่อ repository ต่อท้าย", True),
+           ("  จงเติม", False)],
      size=SZ_SMALL, before=9, after=3)
-q3 = grid(doc, 3, 2, [4000, WIDTH - 4000])
+q3 = grid(doc, 3, 2, [4600, WIDTH - 4600])
 for i, (label, prefix) in enumerate([
-        ("ก. repository ต้องตั้งชื่อว่า", ""),
+        ("ก. ต้องตั้งชื่อ repository ว่า", ""),
         ("ข. URL เว็บไซต์ที่ได้คือ", "https://"),
-        ("ค. URL หน้า profile คือ", "https://")]):
+        ("ค. URL หน้า profile ของอาเนียคือ", "https://")]):
     cell_text(q3.rows[i].cells[0], label, size=SZ_TINY)
     cell_text(q3.rows[i].cells[1], prefix, size=SZ_TINY)
 
@@ -125,7 +128,9 @@ ROWS = [
      "LLO5"),
     ("3",
      ["ก. anya-forger.github.io   ข. anya-forger.github.io   ค. github.com/anya-forger",
-      "ข้อละ 1 คะแนน · ข้อ ก. ผิดถ้าสะกดไม่ตรง username ทุกตัวอักษร รวมขีดกลาง"],
+      "ข้อละ 1 คะแนน · ข้อ ก. ผิดถ้าสะกดไม่ตรง username ทุกตัวอักษร รวมขีดกลาง",
+      "ตอบแบบ project page คือชื่อ repo อื่นแล้ว URL มีชื่อ repo ต่อท้าย ได้ 0 ในข้อ ก. และ ข.",
+      "เพราะขัดเงื่อนไขในโจทย์ แต่ควรอธิบายความต่างของ user site กับ project page ตอนเฉลย"],
      "LLO2"),
     ("4",
      ["2 = เจาะจงจนนึกภาพออก มีสิ่งของ ปัญหา หรือเป้าหมายที่จับต้องได้",
