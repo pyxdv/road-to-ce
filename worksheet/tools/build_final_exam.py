@@ -39,13 +39,24 @@ for side in ('top_margin', 'bottom_margin', 'left_margin', 'right_margin'):
     setattr(sec, side, Twips(MARGIN))
 
 
-def code_box(lines):
-    """กล่องเทาสำหรับแสดงเนื้อหาหน้าเว็บในสถานการณ์"""
-    t = grid(doc, 1, 1, [WIDTH])
-    cell = t.rows[0].cells[0]
-    shade(cell, GREY)
-    for i, line in enumerate(lines):
-        cell_text(cell, line, size=SZ_TINY, first=(i == 0))
+def split_box(headers, src_lines, view_lines):
+    """กล่องสองคอลัมน์ ซ้ายคือซอร์ส markdown ขวาคือผลการแสดงผล
+
+    view_lines เป็น (ข้อความ, ตัวหนา) เพื่อให้ฝั่งขวาดูเหมือนหน้าที่ render แล้วจริง
+    """
+    t = grid(doc, 2, 2, [4750, WIDTH - 4750])
+    for i, h in enumerate(headers):
+        cell_text(t.rows[0].cells[i], h, bold=True, align="center", size=SZ_TINY)
+        shade(t.rows[0].cells[i], ACCENT)
+
+    src = t.rows[1].cells[0]
+    shade(src, GREY)
+    for i, line in enumerate(src_lines):
+        cell_text(src, line, size=SZ_TINY, first=(i == 0))
+
+    view = t.rows[1].cells[1]
+    for i, (line, bold) in enumerate(view_lines):
+        cell_text(view, line, bold=bold, size=SZ_TINY, first=(i == 0))
     return t
 
 
@@ -63,20 +74,40 @@ for i, label in enumerate(("ชื่อ-สกุล", "รหัสนัก�
     cell_text(info.rows[0].cells[i * 2 + 1], "")
 
 para(doc, "สถานการณ์", bold=True, color=BLUE, size=SZ_SMALL, before=8, after=1)
-para(doc, "อาเนียมี GitHub username ว่า  anya-forger  และกำลังจะกด Publish "
-          "หน้าเว็บของตนเอง เนื้อหาบนหน้าเว็บมีดังนี้",
+para(doc, "อาเนียมี GitHub username ว่า  anya-forger  และกำลังจะ commit ไฟล์ "
+          "README.md ขึ้นหน้า profile ของตนเอง",
      size=SZ_TINY, after=3)
-code_box([
-    'อาเนีย  (รหัสนักศึกษา 6740xxxxxx)',
-    '"รักการเขียนโปรแกรมและเทคโนโลยี ตั้งใจเรียนและพัฒนาตัวเอง"',
-    'กำลังเรียนรู้ : Python · HTML · การเขียนโปรแกรม',
-    'ติดต่อ : โทร 08x-xxx-xxxx  ·  หอพักช่อชงโค ห้อง 401',
-    'ตารางเรียน : จันทร์ 13:00 ห้อง 26-401 · พฤหัส 09:00 ห้อง 26-305',
-    '<script> const WEATHER_API_KEY = "sk-live-8f2b91..." </script>',
-])
+split_box(
+    ["ซอร์ส  README.md", "ผลการแสดงผลบนหน้า profile"],
+    ['# อาเนีย ฟอร์เจอร์ · 6740xxxxxx',
+     'รักการเขียนโปรแกรมและเทคโนโลยี ตั้งใจเรียนและพัฒนาตัวเอง',
+     '',
+     '## กำลังเรียนรู้',
+     '- Python',
+     '- HTML',
+     '',
+     '## ติดต่อ',
+     'โทร **08x-xxx-xxxx** · หอพักช่อชงโค ห้อง 401',
+     'เรียนจันทร์ 13:00 ห้อง 26-401 · พฤหัส 09:00 ห้อง 26-305',
+     '',
+     '<script> const KEY = "sk-live-8f2b91..." </script>'],
+    [('อาเนีย ฟอร์เจอร์ · 6740xxxxxx', True),
+     ('รักการเขียนโปรแกรมและเทคโนโลยี ตั้งใจเรียนและพัฒนาตัวเอง', False),
+     ('', False),
+     ('กำลังเรียนรู้', True),
+     ('•  Python', False),
+     ('•  HTML', False),
+     ('', False),
+     ('ติดต่อ', True),
+     ('โทร 08x-xxx-xxxx · หอพักช่อชงโค ห้อง 401', False),
+     ('เรียนจันทร์ 13:00 ห้อง 26-401 · พฤหัส 09:00 ห้อง 26-305', False),
+     ('', False),
+     ('(บรรทัดสุดท้ายไม่ปรากฏบนหน้านี้)', False)])
 
 rich(doc, [("ข้อ 1  (3 คะแนน)  ", True, BLUE),
-           ("ขีดเส้นใต้ 3 จุดในกรอบข้างบน ที่ต้องแก้ก่อนเผยแพร่", False)],
+           ("ขีดเส้นใต้ 3 จุดใน", False),
+           ("ฝั่งซอร์ส README.md", True),
+           (" ที่ต้องแก้ก่อน commit", False)],
      size=SZ_SMALL, before=9, after=0)
 
 rich(doc, [("ข้อ 2  (2 คะแนน)  ", True, BLUE),
@@ -85,9 +116,11 @@ rich(doc, [("ข้อ 2  (2 คะแนน)  ", True, BLUE),
 para(doc, "_" * 92, size=SZ_SMALL, after=0)
 
 rich(doc, [("ข้อ 3  (3 คะแนน)  ", True, BLUE),
-           ("อาเนียเผยแพร่เว็บด้วย GitHub Pages และต้องการให้เปิดได้ที่ URL "
-            "ระดับบนสุด", False),
-           ("  คือไม่มีชื่อ repository ต่อท้าย", True),
+           ("นอกจากหน้า profile ข้างบน อาเนียยังมี", False),
+           ("เว็บไซต์ส่วนตัว", True),
+           (" ที่ทำด้วย GitHub Pages", False),
+           (" และต้องการให้เปิดได้ที่ URL ระดับบนสุด ", False),
+           ("คือไม่มีชื่อ repository ต่อท้าย", True),
            ("  จงเติม", False)],
      size=SZ_SMALL, before=9, after=3)
 q3 = grid(doc, 3, 2, [4600, WIDTH - 4600])
@@ -120,7 +153,9 @@ ROWS = [
     ("1",
      ["จุดละ 1 คะแนน ตอบถูก 3 จุดใดก็ได้จาก 5 จุดที่ฝังไว้",
       "เบอร์โทรศัพท์ · ที่อยู่หอพักพร้อมเลขห้อง · ตารางเรียนที่ระบุห้องและเวลา",
-      "API key ในโค้ด · ชื่อเต็มคู่กับรหัสนักศึกษา"],
+      "API key ในโค้ด · ชื่อเต็มคู่กับรหัสนักศึกษา",
+      "จุดสอน : GitHub ตัด <script> ทิ้งตอน render จึงไม่โผล่ฝั่งขวา แต่ทุกคนกดดูซอร์สได้",
+      "นักศึกษาที่คิดว่าไม่แสดงผลแล้วปลอดภัย คือกลุ่มที่ต้องอธิบายเพิ่มตอนเฉลย"],
      "LLO5"),
     ("2",
      ["2 = ระบุผลลัพธ์ของความเสี่ยง เช่น ตามตัวได้ บัญชีถูกใช้แทน หรือผิด PDPA",
@@ -130,7 +165,8 @@ ROWS = [
      ["ก. anya-forger.github.io   ข. anya-forger.github.io   ค. github.com/anya-forger",
       "ข้อละ 1 คะแนน · ข้อ ก. ผิดถ้าสะกดไม่ตรง username ทุกตัวอักษร รวมขีดกลาง",
       "ตอบแบบ project page คือชื่อ repo อื่นแล้ว URL มีชื่อ repo ต่อท้าย ได้ 0 ในข้อ ก. และ ข.",
-      "เพราะขัดเงื่อนไขในโจทย์ แต่ควรอธิบายความต่างของ user site กับ project page ตอนเฉลย"],
+      "เพราะขัดเงื่อนไขในโจทย์ แต่ควรอธิบายความต่างของ user site กับ project page ตอนเฉลย",
+      "ตอบ anya-forger เฉย ๆ คือสับสนกับ repo ของหน้า profile ในสถานการณ์ ให้ 0 และอธิบายเพิ่ม"],
      "LLO2"),
     ("4",
      ["2 = เจาะจงจนนึกภาพออก มีสิ่งของ ปัญหา หรือเป้าหมายที่จับต้องได้",
